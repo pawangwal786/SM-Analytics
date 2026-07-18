@@ -1,0 +1,11 @@
+.git
+.github
+.gitlab
+.idea
+.vscode
+__pycache__
+*.pyc
+.venv
+venv
+data/
+docs/

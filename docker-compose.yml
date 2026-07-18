@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-stock_platform}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg15
+    container_name: timescaledb
+    environment:
+      POSTGRES_USER: ${TIMESCALEDB_USER:-admin}
+      POSTGRES_PASSWORD: ${TIMESCALEDB_PASSWORD:-password}
+      POSTGRES_DB: ${TIMESCALEDB_DB:-market_data}
+    ports:
+      - "5433:5432"
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    environment:
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-admin}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-password}
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    restart: unless-stopped
+
+  scylladb:
+    image: scylladb/scylla:latest
+    container_name: scylladb
+    ports:
+      - "9042:9042"
+    volumes:
+      - scylladb_data:/var/lib/scylla
+    restart: unless-stopped
+
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:latest
+    container_name: victoriametrics
+    ports:
+      - "8428:8428"
+    volumes:
+      - victoriametrics_data:/victoria-metrics-data
+    restart: unless-stopped
+
+  vector:
+    image: timberio/vector:latest-alpine
+    container_name: vector
+    ports:
+      - "8686:8686"
+    volumes:
+      - vector_data:/var/lib/vector
+      - ./deployment/docker/vector/vector.yaml:/etc/vector/vector.yaml:ro
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  timescaledb_data:
+  redis_data:
+  clickhouse_data:
+  scylladb_data:
+  victoriametrics_data:
+  vector_data:
+  grafana_data:
