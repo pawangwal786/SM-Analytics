@@ -1,32 +1,93 @@
 [project]
-name = "stock-platform"
+name = "sm-analytics"
 version = "0.1.0"
-description = "Stock Platform Foundation"
+description = "Stock market analytics and trading platform."
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = [
-    "fastapi>=0.111.0",
-    "uvicorn[standard]>=0.30.1",
-    "pydantic-settings>=2.2.1",
-]
+requires-python = ">=3.12"
+dependencies = []
 
 [project.optional-dependencies]
+
 dev = [
-    "pytest>=8.2.0",
-    "pytest-cov>=5.0.0",
-    "ruff>=0.4.0",
-    "mypy>=1.10.0",
-    "pre-commit>=3.7.0",
+    "ruff>=0.12",
+    "mypy>=1.17",
+    "pre-commit>=4.3",
+]
+
+test = [
+    "pytest>=8.4",
+    "pytest-cov>=6.2",
+]
+
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.6",
+]
+
+license = { text = "MIT" }
+
+authors = [
+    { name = "Pawan" }
 ]
 
 [tool.ruff]
-line-length = 88
-target-version = "py313"
+line-length = 100
+target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP"]
+select = [
+    "E",
+    "F",
+    "I",
+    "UP",
+    "B",
+    "SIM",
+    "N",
+    "C4",
+]
+
+[tool.ruff.format]
+
+quote-style = "double"
+
+indent-style = "space"
+
+skip-magic-trailing-comma = false
+
+line-ending = "lf"
 
 [tool.mypy]
-python_version = "3.13"
-strict = true
+python_version = "3.12"
+strict = false
+warn_unused_configs = true
+
+warn_return_any = true
+
+check_untyped_defs = true
+
+pretty = true
+
+strict_optional = true
 ignore_missing_imports = true
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+
+testpaths = [
+    "backend/tests",
+]
+
+python_files = [
+    "test_*.py",
+]
+
+[tool.coverage.run]
+
+branch = true
+
+source = [
+    "backend",
+]
