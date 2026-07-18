@@ -1,23 +1,37 @@
-.PHONY: setup lint format test run-dev docker-up docker-down
+﻿.DEFAULT_GOAL := help
 
-setup:
-	uv sync --all-extras
+.PHONY: \
+	help \
+	bootstrap \
+	format \
+	lint \
+	test \
+	clean \
+	precommit
 
-lint:
-	uv run ruff check .
-	uv run mypy backend/
+help:
+	@echo "Available targets:"
+	@echo "  bootstrap   Install development dependencies"
+	@echo "  format      Format source code"
+	@echo "  lint        Run static analysis"
+	@echo "  test        Run tests"
+	@echo "  clean       Remove generated files"
+	@echo "  precommit   Run formatting, linting, and tests"
+
+bootstrap:
+	@./scripts/bootstrap.sh
 
 format:
-	uv run ruff format .
+	@./scripts/format.sh
+
+lint:
+	@./scripts/lint.sh
 
 test:
-	uv run pytest --cov=backend backend/tests/
+	@./scripts/test.sh
 
-run-dev:
-	uv run uvicorn backend.apps.gateway.main:app --reload --port 8000
+clean:
+	@./scripts/clean.sh
 
-docker-up:
-	docker-compose up -d
-
-docker-down:
-	docker-compose down
+precommit:
+	@./scripts/precommit.sh

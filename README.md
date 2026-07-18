@@ -151,28 +151,47 @@ sm-analytics/
 
 ---
 
-# Development Setup
+## Development Setup
 
-## Prerequisites
+### Prerequisites
 
 - Git
 - Python 3.12+
 - Docker
 - Docker Compose
 - Make
-- Node.js (future)
-- Flutter SDK (future)
 
-## Clone Repository
+### Clone Repository
 
 ```bash
 git clone <repository-url>
 cd sm-analytics
 ```
 
-## Install Development Dependencies
+### Local Infrastructure (Phase 0.7)
 
-Details will be added as development progresses.
+We use Docker Compose to run local infrastructure services (PostgreSQL, Redis, Grafana).
+
+First, create your local environment variables:
+```bash
+cp .env.example .env
+```
+
+**Startup:**
+```bash
+docker compose -f docker-compose.dev.yml up -d
+```
+
+**Shutdown:**
+```bash
+docker compose -f docker-compose.dev.yml down
+```
+
+### Install Development Dependencies
+
+```bash
+make bootstrap
+```
 
 ---
 

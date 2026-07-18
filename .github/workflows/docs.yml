@@ -1,0 +1,32 @@
+﻿name: Docs
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check Required Files
+        run: |
+          if [ ! -f "README.md" ]; then
+            echo "README.md is missing!"
+            exit 1
+          fi
+          if [ ! -d "docs" ]; then
+            echo "docs directory is missing!"
+            exit 1
+          fi
+          echo "Required documentation files are present."
+
+      - name: Check Markdown formatting
+        uses: DavidAnson/markdownlint-cli2-action@v15
+        with:
+          globs: "**/*.md"
+        continue-on-error: true # Warning only for now since there's no lint rules set
