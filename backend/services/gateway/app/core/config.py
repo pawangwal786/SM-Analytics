@@ -1,12 +1,11 @@
 import os
-from functools import lru_cache
-from typing import List
 import sys
+from functools import lru_cache
 
 # Ensure backend directory is in the path to allow imports.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../..")))
 
-from libs.settings.base import BaseSettings
+from backend.libs.settings.base import BaseSettings
 
 
 class GatewaySettings(BaseSettings):
@@ -16,10 +15,10 @@ class GatewaySettings(BaseSettings):
     port: int = 8000
 
     # Gateway specific
-    cors_origins: List[str] = ["*"]
+    cors_origins: list[str] = ["*"]
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> GatewaySettings:
     """Dependency injection provider for GatewaySettings."""
     return GatewaySettings()

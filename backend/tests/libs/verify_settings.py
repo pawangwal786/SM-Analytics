@@ -9,10 +9,10 @@ except ImportError:
     print("Pydantic not installed. Please install 'pydantic' and 'pydantic-settings'.")
     sys.exit(1)
 
-from libs.settings.environment import AppEnv
-from libs.settings.exceptions import ConfigurationError
-from libs.settings.loaders import get_env_file
-from libs.settings.base import BaseSettings
+from backend.libs.settings.base import BaseSettings
+from backend.libs.settings.environment import AppEnv
+from backend.libs.settings.exceptions import ConfigurationError
+from backend.libs.settings.loaders import get_env_file
 
 
 def main():
@@ -42,13 +42,12 @@ def main():
         del os.environ["PORT"]
 
     # Create empty .env.testing to avoid FileNotFoundError if BaseSettings looks for it strictly
-    # Actually pydantic-settings just ignores missing env files by default unless specified otherwise.
+    # Actually pydantic-settings just ignores missing env files by default
+    # unless specified otherwise.
 
     try:
         BaseSettings()
-        print(
-            "FAIL: BaseSettings should have raised ValidationError for missing required fields"
-        )
+        print("FAIL: BaseSettings should have raised ValidationError for missing required fields")
         sys.exit(1)
     except ValidationError:
         print("PASS: BaseSettings raised ValidationError for missing required fields")

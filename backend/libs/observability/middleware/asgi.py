@@ -3,7 +3,7 @@ import time
 import uuid
 from contextvars import Token
 
-from ..context.vars import request_id_ctx_var, correlation_id_ctx_var
+from backend.libs.observability.context.vars import correlation_id_ctx_var, request_id_ctx_var
 
 logger = logging.getLogger(__name__)
 
@@ -32,9 +32,7 @@ class ObservabilityMiddleware:
         corr_id_header = headers.get(b"x-correlation-id")
 
         request_id = req_id_header.decode() if req_id_header else str(uuid.uuid4())
-        correlation_id = (
-            corr_id_header.decode() if corr_id_header else str(uuid.uuid4())
-        )
+        correlation_id = corr_id_header.decode() if corr_id_header else str(uuid.uuid4())
 
         # Set context variables and store tokens for cleanup
         req_token: Token = request_id_ctx_var.set(request_id)

@@ -1,10 +1,10 @@
 import pytest
 from pydantic import ValidationError
 
-from libs.settings.environment import AppEnv
-from libs.settings.exceptions import ConfigurationError
-from libs.settings.loaders import get_env_file
-from libs.settings.base import BaseSettings
+from backend.libs.settings.base import BaseSettings
+from backend.libs.settings.environment import AppEnv
+from backend.libs.settings.exceptions import ConfigurationError
+from backend.libs.settings.loaders import get_env_file
 
 
 def test_app_env_enum():

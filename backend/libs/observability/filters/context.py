@@ -1,6 +1,6 @@
 import logging
 
-from ..context.vars import get_request_id, get_correlation_id
+from backend.libs.observability.context.vars import get_correlation_id, get_request_id
 
 
 class ContextInjectionFilter(logging.Filter):

@@ -1,13 +1,15 @@
 import os
-from functools import lru_cache
-from pydantic import SecretStr, PostgresDsn, RedisDsn
 import sys
+from functools import lru_cache
 
-# Ensure backend directory is in the path to allow imports, since we aren't using an installed package yet.
+from pydantic import PostgresDsn, RedisDsn, SecretStr
+
+# Ensure backend directory is in the path to allow imports, since we
+# aren't using an installed package yet.
 # In a real deployed environment with a workspace, this would be handled by Python packaging.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../..")))
 
-from libs.settings.base import BaseSettings
+from backend.libs.settings.base import BaseSettings
 
 
 class AuthSettings(BaseSettings):
@@ -28,7 +30,7 @@ class AuthSettings(BaseSettings):
     redis_url: RedisDsn
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> AuthSettings:
     """Dependency injection provider for AuthSettings."""
     return AuthSettings()

@@ -1,4 +1,7 @@
 import os
+
+from backend.libs.settings.exceptions import ConfigurationError
+
 from .environment import AppEnv
 
 
@@ -11,13 +14,9 @@ def get_env_file() -> str:
 
     try:
         app_env = AppEnv(env)
-    except ValueError:
-        from .exceptions import ConfigurationError
-
+    except ValueError as err:
         valid_envs = [e.value for e in AppEnv]
-        raise ConfigurationError(
-            f"Invalid APP_ENV: '{env}'. Must be one of {valid_envs}."
-        )
+        raise ConfigurationError(f"Invalid APP_ENV: '{env}'. Must be one of {valid_envs}.") from err
 
     if app_env == AppEnv.PRODUCTION:
         return ".env.production"

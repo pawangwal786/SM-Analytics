@@ -1,5 +1,7 @@
 from pydantic import Field
-from pydantic_settings import BaseSettings as PydanticBaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings as PydanticBaseSettings
+from pydantic_settings import SettingsConfigDict
+
 from .environment import AppEnv
 from .loaders import get_env_file
 

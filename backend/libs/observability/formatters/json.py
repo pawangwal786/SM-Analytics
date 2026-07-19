@@ -1,9 +1,9 @@
 import json
 import logging
-from datetime import datetime, timezone
-from typing import Any, Dict
+from datetime import UTC, datetime
+from typing import Any
 
-from ..filters.redaction import Redactor
+from backend.libs.observability.filters.redaction import Redactor
 
 
 class JSONFormatter(logging.Formatter):
@@ -18,8 +18,8 @@ class JSONFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         """Construct the core JSON payload for the log record."""
-        payload: Dict[str, Any] = {
-            "timestamp": datetime.fromtimestamp(record.created, timezone.utc)
+        payload: dict[str, Any] = {
+            "timestamp": datetime.fromtimestamp(record.created, UTC)
             .isoformat()
             .replace("+00:00", "Z"),
             "level": record.levelname,
@@ -92,7 +92,7 @@ class JSONFormatter(logging.Formatter):
 
         return self.serialize(redacted_payload)
 
-    def serialize(self, record_dict: Dict[str, Any]) -> str:
+    def serialize(self, record_dict: dict[str, Any]) -> str:
         """
         Abstract serialization point.
         Uses standard json but can be overridden with orjson if performance dictates.

@@ -1,16 +1,17 @@
+import logging
+import os
+import sys
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-import logging
-import sys
-import os
 
 # Ensure backend directory is in the path to allow imports.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-from app.core.config import get_settings
-from libs.observability.logging.setup import configure_logging
-from libs.observability.middleware.asgi import ObservabilityMiddleware
-from libs.observability.context.vars import get_request_id
+from backend.libs.observability.context.vars import get_request_id
+from backend.libs.observability.logging.setup import configure_logging
+from backend.libs.observability.middleware.asgi import ObservabilityMiddleware
+from backend.services.gateway.app.core.config import get_settings
 
 settings = get_settings()
 

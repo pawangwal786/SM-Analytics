@@ -4,14 +4,14 @@ import logging
 
 import pytest
 
-from libs.observability.filters.redaction import Redactor
-from libs.observability.formatters.json import JSONFormatter
-from libs.observability.context.vars import (
-    request_id_ctx_var,
-    get_request_id,
+from backend.libs.observability.context.vars import (
     get_correlation_id,
+    get_request_id,
+    request_id_ctx_var,
 )
-from libs.observability.middleware.asgi import ObservabilityMiddleware
+from backend.libs.observability.filters.redaction import Redactor
+from backend.libs.observability.formatters.json import JSONFormatter
+from backend.libs.observability.middleware.asgi import ObservabilityMiddleware
 
 
 def test_redactor_exact_match():
@@ -128,9 +128,7 @@ async def test_asgi_middleware_streaming_and_disconnect():
         if event["type"] == "http.disconnect":
             return
 
-        await send(
-            {"type": "http.response.body", "body": b"chunk2", "more_body": False}
-        )
+        await send({"type": "http.response.body", "body": b"chunk2", "more_body": False})
 
     middleware = ObservabilityMiddleware(mock_app)
 

@@ -1,8 +1,8 @@
 import logging
 import sys
 
-from ..formatters.json import JSONFormatter
-from ..filters.context import ContextInjectionFilter
+from backend.libs.observability.filters.context import ContextInjectionFilter
+from backend.libs.observability.formatters.json import JSONFormatter
 
 
 def configure_logging(service_name: str, environment: str, log_level: str = "INFO"):
@@ -32,9 +32,7 @@ def configure_logging(service_name: str, environment: str, log_level: str = "INF
     handler.setFormatter(formatter)
 
     # Attach context injection filter to automatically append request/correlation IDs
-    context_filter = ContextInjectionFilter(
-        service=service_name, environment=environment
-    )
+    context_filter = ContextInjectionFilter(service=service_name, environment=environment)
     handler.addFilter(context_filter)
 
     root_logger.addHandler(handler)
