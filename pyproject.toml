@@ -78,6 +78,8 @@ test = [
     "pytest>=8.4",
     "pytest-cov>=6.2",
     "pytest-asyncio",
+    "asyncpg",
+    "testcontainers[postgres]",
 ]
 
 ##########################
