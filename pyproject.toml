@@ -5,10 +5,10 @@ description = "Stock market analytics and trading platform."
 readme = "README.md"
 requires-python = ">=3.12"
 
-license = { text = "MIT" }
+license = { text = "Apache-2.0" }
 
 authors = [
-    { name = "Pawan" }
+    { name = "Pawan Kumar Gwal" }
 ]
 
 dependencies = []
