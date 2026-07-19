@@ -1,17 +1,59 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
 [project]
 name = "sm-analytics"
 version = "0.1.0"
-description = "Stock market analytics and trading platform."
+description = "Production-grade stock market analytics and trading platform."
 readme = "README.md"
 requires-python = ">=3.12"
-
 license = { text = "Apache-2.0" }
 
 authors = [
     { name = "Pawan Kumar Gwal" }
 ]
 
-dependencies = []
+keywords = [
+    "stock-market",
+    "analytics",
+    "fastapi",
+    "trading",
+    "finance",
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "fastapi>=0.116",
+    "uvicorn[standard]>=0.35",
+    "pydantic>=2.11",
+    "pydantic-settings>=2.10",
+
+    "sqlalchemy>=2.0",
+    "alembic>=1.16",
+    "psycopg[binary]>=3.2",
+
+    "redis>=6.2",
+
+    "python-dotenv>=1.1",
+
+    "httpx>=0.28",
+
+    "orjson>=3.11",
+
+    "structlog>=25.4",
+
+    "prometheus-client>=0.23",
+
+    "typing-extensions>=4.15",
+]
 
 [project.optional-dependencies]
 
@@ -19,11 +61,12 @@ dev = [
     "ruff>=0.12",
     "mypy>=1.17",
     "pre-commit>=4.3",
-]
 
-test = [
     "pytest>=8.4",
     "pytest-cov>=6.2",
+
+    "types-redis",
+    "types-python-dateutil",
 ]
 
 docs = [
@@ -31,11 +74,32 @@ docs = [
     "mkdocs-material>=9.6",
 ]
 
+test = [
+    "pytest>=8.4",
+    "pytest-cov>=6.2",
+]
+
+##########################
+# Hatch
+##########################
+
+[tool.hatch.build.targets.wheel]
+
+packages = [
+    "backend"
+]
+
+##########################
+# Ruff
+##########################
+
 [tool.ruff]
-line-length = 100
+
 target-version = "py312"
+line-length = 100
 
 [tool.ruff.lint]
+
 select = [
     "E",
     "F",
@@ -47,37 +111,44 @@ select = [
     "C4",
 ]
 
+ignore = []
+
 [tool.ruff.format]
 
 quote-style = "double"
-
 indent-style = "space"
-
+line-ending = "lf"
 skip-magic-trailing-comma = false
 
-line-ending = "lf"
+##########################
+# MyPy
+##########################
 
 [tool.mypy]
-python_version = "3.12"
-strict = false
-warn_unused_configs = true
 
+python_version = "3.12"
+
+strict = true
+
+warn_unused_configs = true
 warn_return_any = true
+warn_unused_ignores = true
 
 check_untyped_defs = true
 
+strict_optional = true
+
 pretty = true
 
-strict_optional = true
 ignore_missing_imports = true
 
-[build-system]
-requires = ["hatchling>=1.27"]
-build-backend = "hatchling.build"
-[tool.hatch.build.targets.wheel]
-packages = ["src/sm_analytics"]
+##########################
+# Pytest
+##########################
 
 [tool.pytest.ini_options]
+
+minversion = "8.0"
 
 testpaths = [
     "backend/tests",
@@ -87,6 +158,25 @@ python_files = [
     "test_*.py",
 ]
 
+python_classes = [
+    "Test*",
+]
+
+python_functions = [
+    "test_*",
+]
+
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--tb=short",
+]
+
+##########################
+# Coverage
+##########################
+
 [tool.coverage.run]
 
 branch = true
@@ -94,3 +184,19 @@ branch = true
 source = [
     "backend",
 ]
+
+[tool.coverage.report]
+
+show_missing = true
+
+skip_covered = false
+
+fail_under = 90
+
+##########################
+# Coverage HTML
+##########################
+
+[tool.coverage.html]
+
+directory = "htmlcov"
