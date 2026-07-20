@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  postgres-test:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpassword
+      POSTGRES_DB: sm_test
+    ports:
+      - "5433:5432"
+    tmpfs:
+      # Use in-memory storage for test database to maximize I/O speed
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testuser -d sm_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 10

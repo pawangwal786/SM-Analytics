@@ -1,27 +1,67 @@
-﻿name: Tests
+name: Tests
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   pull_request:
+    branches: [ "main" ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: sm_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --tmpfs /var/lib/postgresql/data
+
+    env:
+      APP_ENV: testing
+      TEST_DATABASE_URL: postgresql://testuser:testpassword@localhost:5433/sm_test
+      # Make sure the asyncpg version of the URL is used by the test fixtures
+
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[test]"
+    - name: Install uv
+      run: pip install uv
 
-      - name: Run pytest
-        run: pytest
+    - name: Cache uv environment
+      uses: actions/cache@v4
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
+
+    - name: Install dependencies
+      run: uv pip install -e .[test] --system
+
+    - name: Wait for database
+      run: |
+        while ! pg_isready -h localhost -p 5433 -U testuser; do
+          sleep 1;
+        done
+
+    - name: Run pytest with coverage
+      run: pytest --cov=backend
+
+    # - name: Run Alembic migrations
+    #   run: |
+    #     alembic -c backend/services/auth/alembic.ini upgrade head
+    #     alembic -c backend/services/users/alembic.ini upgrade head
+    # (Commented out until Alembic testing phase is implemented)

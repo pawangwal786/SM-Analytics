@@ -176,6 +176,14 @@ addopts = [
     "--tb=short",
 ]
 
+asyncio_mode = "auto"
+markers = [
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "database: marks tests that require a database connection",
+    "slow: marks tests that take a long time to run",
+]
+
 ##########################
 # Coverage
 ##########################
@@ -185,7 +193,14 @@ addopts = [
 branch = true
 
 source = [
-    "backend",
+    "backend/services",
+    "backend/libs",
+]
+
+omit = [
+    "*/alembic/*",
+    "*/tests/*",
+    "*/__init__.py",
 ]
 
 [tool.coverage.report]

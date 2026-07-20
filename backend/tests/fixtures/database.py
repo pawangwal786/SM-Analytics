@@ -1,0 +1,22 @@
+import os
+
+import pytest
+
+
+@pytest.fixture(scope="session")
+def database_url(postgres_container: str | None) -> str:
+    """
+    Resolves the canonical testing database URL.
+    Priority: TEST_DATABASE_URL environment variable -> testcontainers -> error.
+    """
+    # 1. Check for explicit environment variable (CI, Docker Compose, local config)
+    env_url = os.environ.get("TEST_DATABASE_URL")
+    if env_url:
+        return env_url
+
+    # 2. Fall back to automatically provisioned testcontainer
+    if postgres_container:
+        return postgres_container
+
+    # 3. Fail gracefully if neither is available
+    pytest.skip("No TEST_DATABASE_URL provided and Docker daemon is unavailable for Testcontainers.")
