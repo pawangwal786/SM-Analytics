@@ -9,10 +9,10 @@ except ImportError:
     print("Pydantic not installed. Please install 'pydantic' and 'pydantic-settings'.")
     sys.exit(1)
 
-from backend.libs.settings.base import BaseSettings
 from backend.libs.settings.environment import AppEnv
 from backend.libs.settings.exceptions import ConfigurationError
 from backend.libs.settings.loaders import get_env_file
+from backend.libs.settings.service import ServiceSettings
 
 
 def main():
@@ -33,34 +33,34 @@ def main():
     assert get_env_file() == ".env.development"
     print("PASS: get_env_file defaults to development")
 
-    # 3. Test BaseSettings missing required fields
+    # 3. Test ServiceSettings missing required fields
     os.environ["APP_ENV"] = "testing"
-    # Ensure app_name/port are not in env
+    # Ensure app_name is not in env
     if "APP_NAME" in os.environ:
         del os.environ["APP_NAME"]
-    if "PORT" in os.environ:
-        del os.environ["PORT"]
+    if "APP_PORT" in os.environ:
+        del os.environ["APP_PORT"]
 
-    # Create empty .env.testing to avoid FileNotFoundError if BaseSettings looks for it strictly
+    # Create empty .env.testing to avoid FileNotFoundError if ServiceSettings looks for it strictly
     # Actually pydantic-settings just ignores missing env files by default
     # unless specified otherwise.
 
     try:
-        BaseSettings()
-        print("FAIL: BaseSettings should have raised ValidationError for missing required fields")
+        ServiceSettings()
+        print("FAIL: ServiceSettings should have raised ValidationError for missing required fields")
         sys.exit(1)
     except ValidationError:
-        print("PASS: BaseSettings raised ValidationError for missing required fields")
+        print("PASS: ServiceSettings raised ValidationError for missing required fields")
 
-    # 4. Test BaseSettings with valid fields
+    # 4. Test ServiceSettings with valid fields
     os.environ["APP_NAME"] = "test-service"
-    os.environ["PORT"] = "8080"
+    os.environ["APP_PORT"] = "8080"
 
-    settings = BaseSettings()
+    settings = ServiceSettings()
     assert settings.app_name == "test-service"
-    assert settings.port == 8080
+    assert settings.app_port == 8080
     assert settings.environment == AppEnv.TESTING
-    print("PASS: BaseSettings instantiated successfully with environment variables")
+    print("PASS: ServiceSettings instantiated successfully with environment variables")
 
     print("ALL TESTS PASSED")
 

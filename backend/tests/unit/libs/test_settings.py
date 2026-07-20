@@ -1,10 +1,11 @@
 import pytest
 from pydantic import ValidationError
 
-from backend.libs.settings.base import BaseSettings
+from backend.libs.settings.core import CoreSettings
 from backend.libs.settings.environment import AppEnv
 from backend.libs.settings.exceptions import ConfigurationError
 from backend.libs.settings.loaders import get_env_file
+from backend.libs.settings.service import ServiceSettings
 
 
 def test_app_env_enum():
@@ -38,24 +39,32 @@ def test_get_env_file_invalid(monkeypatch):
     assert "Invalid APP_ENV: 'staging'" in str(exc.value)
 
 
-def test_base_settings_defaults(monkeypatch):
+def test_core_settings_defaults(monkeypatch):
     monkeypatch.setenv("APP_ENV", "testing")
-    # Missing required field `app_name` and `port` should raise validation error
+
+    settings = CoreSettings()
+    assert settings.environment == AppEnv.TESTING
+    assert settings.log_level == "INFO"
+    assert settings.debug is False
+
+
+def test_service_settings_missing_required(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "testing")
+    # Missing required field `app_name` should raise validation error
     with pytest.raises(ValidationError) as exc:
-        BaseSettings()
+        ServiceSettings()
 
     errors = exc.value.errors()
     assert any(e["loc"] == ("app_name",) for e in errors)
-    assert any(e["loc"] == ("port",) for e in errors)
 
 
-def test_base_settings_success(monkeypatch):
+def test_service_settings_success(monkeypatch):
     monkeypatch.setenv("APP_ENV", "testing")
     monkeypatch.setenv("APP_NAME", "test-app")
-    monkeypatch.setenv("PORT", "8080")
+    monkeypatch.setenv("APP_PORT", "8080")
 
-    settings = BaseSettings()
+    settings = ServiceSettings()
     assert settings.app_name == "test-app"
-    assert settings.port == 8080
+    assert settings.app_port == 8080
     assert settings.environment == AppEnv.TESTING
     assert settings.log_level == "INFO"
