@@ -19,9 +19,7 @@ class JSONFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         """Construct the core JSON payload for the log record."""
         payload: dict[str, Any] = {
-            "timestamp": datetime.fromtimestamp(record.created, UTC)
-            .isoformat()
-            .replace("+00:00", "Z"),
+            "timestamp": datetime.fromtimestamp(record.created, UTC).isoformat().replace("+00:00", "Z"),
             "level": record.levelname,
             "service": getattr(record, "service", "unknown"),
             "environment": getattr(record, "environment", "unknown"),
@@ -78,11 +76,7 @@ class JSONFormatter(logging.Formatter):
             "correlation_id",
         }
 
-        extra_data = {
-            k: v
-            for k, v in record.__dict__.items()
-            if k not in standard_keys and not k.startswith("_")
-        }
+        extra_data = {k: v for k, v in record.__dict__.items() if k not in standard_keys and not k.startswith("_")}
 
         # Merge extra fields into the root of the payload
         payload.update(extra_data)

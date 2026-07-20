@@ -61,9 +61,7 @@ class Redactor:
         self.replacement = replacement
         self.keys = {k.strip().lower() for k in (exact_keys or self.DEFAULT_KEYS)}
         try:
-            self.patterns = tuple(
-                re.compile(p, re.IGNORECASE) for p in (patterns or self.DEFAULT_PATTERNS)
-            )
+            self.patterns = tuple(re.compile(p, re.IGNORECASE) for p in (patterns or self.DEFAULT_PATTERNS))
         except re.error as e:
             raise ValueError(f"Invalid redaction pattern: {e}") from e
 
@@ -83,9 +81,7 @@ class Redactor:
 
         if isinstance(obj, Mapping):
             result = {
-                k: self.replacement
-                if isinstance(k, str) and self._redact_key(k)
-                else self._redact(v, seen)
+                k: self.replacement if isinstance(k, str) and self._redact_key(k) else self._redact(v, seen)
                 for k, v in obj.items()
             }
         elif isinstance(obj, list):

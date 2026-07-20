@@ -21,13 +21,9 @@ async def get_session(request: Request) -> AsyncGenerator[AsyncSession, None]:
     Enforces the 'One Request -> One Transaction' pattern.
     Commits on success, rolls back on unhandled exceptions.
     """
-    session_factory: async_sessionmaker[AsyncSession] = getattr(
-        request.app.state, "session_factory", None
-    )
+    session_factory: async_sessionmaker[AsyncSession] = getattr(request.app.state, "session_factory", None)
     if not session_factory:
-        raise RuntimeError(
-            "Database session_factory not found on app state. Is lifespan configured?"
-        )
+        raise RuntimeError("Database session_factory not found on app state. Is lifespan configured?")
 
     async with session_factory() as session:
         try:

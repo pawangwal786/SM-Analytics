@@ -79,9 +79,7 @@ async def test_session_dependency_commits_on_success(session_factory):
 
     # Create a test table using raw SQL
     async with session_factory() as setup_session:
-        await setup_session.execute(
-            text("CREATE TABLE IF NOT EXISTS test_commit (id SERIAL PRIMARY KEY, val TEXT)")
-        )
+        await setup_session.execute(text("CREATE TABLE IF NOT EXISTS test_commit (id SERIAL PRIMARY KEY, val TEXT)"))
         await setup_session.commit()
 
     # Simulate a successful request using the dependency
@@ -96,9 +94,7 @@ async def test_session_dependency_commits_on_success(session_factory):
 
     # Verify data was committed
     async with session_factory() as verify_session:
-        result = await verify_session.execute(
-            text("SELECT count(*) FROM test_commit WHERE val = 'success'")
-        )
+        result = await verify_session.execute(text("SELECT count(*) FROM test_commit WHERE val = 'success'"))
         count = result.scalar()
         assert count == 1
 
@@ -110,9 +106,7 @@ async def test_session_dependency_rolls_back_on_error(session_factory):
 
     # Create table
     async with session_factory() as setup_session:
-        await setup_session.execute(
-            text("CREATE TABLE IF NOT EXISTS test_rollback (id SERIAL PRIMARY KEY, val TEXT)")
-        )
+        await setup_session.execute(text("CREATE TABLE IF NOT EXISTS test_rollback (id SERIAL PRIMARY KEY, val TEXT)"))
         await setup_session.commit()
 
     session_gen = get_session(request)
@@ -126,9 +120,7 @@ async def test_session_dependency_rolls_back_on_error(session_factory):
 
     # Verify data was NOT committed
     async with session_factory() as verify_session:
-        result = await verify_session.execute(
-            text("SELECT count(*) FROM test_rollback WHERE val = 'should_fail'")
-        )
+        result = await verify_session.execute(text("SELECT count(*) FROM test_rollback WHERE val = 'should_fail'"))
         count = result.scalar()
         assert count == 0
 
