@@ -1,0 +1,121 @@
+name: sm-analytics
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sm_analytics}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../postgres/postgres.conf:/etc/postgresql/postgresql.conf:ro
+      - ../postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - sm_network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-sm_analytics}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      project: sm-analytics
+      service: postgres
+
+  redis:
+    image: redis:7-alpine
+    command: >
+      redis-server
+      /usr/local/etc/redis/redis.conf
+      --requirepass ${REDIS_PASSWORD:-redis}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ../redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - sm_network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      project: sm-analytics
+      service: redis
+
+networks:
+  sm_network:
+    name: sm-network
+    driver: bridge
+
+volumes:
+  postgres_data:
+    name: sm-postgres-data
+
+  redis_data:
+    name: sm-redis-data
+
+  grafana_data:
+    name: sm-grafana-data
+
+# name: sm-analytics
+
+# services:
+#   postgres:
+#     image: postgres:15-alpine
+#     environment:
+#       POSTGRES_DB: ${POSTGRES_DB:-sm_analytics}
+#       POSTGRES_USER: ${POSTGRES_USER:-postgres}
+#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#       - ../postgres/postgres.conf:/etc/postgresql/postgresql.conf:ro
+#       - ../postgres/init:/docker-entrypoint-initdb.d
+#     networks:
+#       - sm_network
+#     restart: unless-stopped
+#     healthcheck:
+#       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-sm_analytics}" ]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+
+#   redis:
+#     image: redis:7-alpine
+#     command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD:-redis}
+#     ports:
+#       - "6379:6379"
+#     volumes:
+#       - redis_data:/data
+#       - ../redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+#     networks:
+#       - sm_network
+#     restart: unless-stopped
+#     healthcheck:
+#       test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis}", "ping" ]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+
+# networks:
+#   sm_network:
+#     name: sm-network
+
+# volumes:
+#   postgres_data:
+#     name: sm-postgres-data
+
+#   redis_data:
+#     name: sm-redis-data

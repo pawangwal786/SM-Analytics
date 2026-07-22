@@ -13,7 +13,7 @@ services:
       # Use in-memory storage for test database to maximize I/O speed
       - /var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U testuser -d sm_test"]
+      test: [ "CMD-SHELL", "pg_isready -U testuser -d sm_test" ]
       interval: 2s
       timeout: 5s
       retries: 10
