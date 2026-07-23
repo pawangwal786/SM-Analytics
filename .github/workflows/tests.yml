@@ -59,9 +59,3 @@ jobs:
 
     - name: Run pytest with coverage
       run: pytest --cov=backend
-
-    # - name: Run Alembic migrations
-    #   run: |
-    #     alembic -c backend/services/auth/alembic.ini upgrade head
-    #     alembic -c backend/services/users/alembic.ini upgrade head
-    # (Commented out until Alembic testing phase is implemented)
