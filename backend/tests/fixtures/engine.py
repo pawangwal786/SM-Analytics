@@ -14,19 +14,29 @@ from backend.libs.database.base import Base
 
 @pytest_asyncio.fixture(scope="session")
 async def engine(database_url: str) -> AsyncGenerator[AsyncEngine, None]:
-    """Creates the AsyncEngine connected to the test database."""
-    test_engine = create_async_engine(database_url, pool_pre_ping=True, echo=False)
-    yield test_engine
-    await test_engine.dispose()
+    """Create the AsyncEngine connected to the test database."""
+    test_engine = create_async_engine(
+        database_url,
+        pool_pre_ping=True,
+        echo=False,
+    )
+
+    try:
+        yield test_engine
+    finally:
+        await test_engine.dispose()
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
-async def create_schema(engine: AsyncEngine) -> AsyncGenerator[None, None]:
+async def create_schema(
+    engine: AsyncEngine,
+) -> AsyncGenerator[None, None]:
     """
-    Creates all tables in the test database before the test session starts,
-    and drops them after it finishes.
+    Create the database schema before the test session
+    and drop it after the session completes.
     """
-    # Make sure all models are imported so Base.metadata is fully populated
+
+    # Import models so Base.metadata is fully populated
     import backend.services.auth.app.models  # noqa: F401
     import backend.services.users.app.models  # noqa: F401
 
@@ -44,10 +54,10 @@ async def connection(
     engine: AsyncEngine,
 ) -> AsyncGenerator[AsyncConnection, None]:
     """
-    Creates a dedicated database connection for each test.
+    Create one database connection for each test.
     """
-    async with engine.connect() as connection:
-        yield connection
+    async with engine.connect() as conn:
+        yield conn
 
 
 @pytest_asyncio.fixture
@@ -55,29 +65,28 @@ async def transaction(
     connection: AsyncConnection,
 ) -> AsyncGenerator[AsyncConnection, None]:
     """
-    Starts an outer database transaction for each test and rolls it back
-    after the test completes.
+    Start an outer transaction for the current test.
     """
+
     outer_transaction = await connection.begin()
 
     try:
         yield connection
     finally:
-        await outer_transaction.rollback()
+        if outer_transaction.is_active:
+            await outer_transaction.rollback()
 
 
 @pytest_asyncio.fixture
 async def db_session(
-    connection: AsyncConnection,
+    transaction: AsyncConnection,
 ) -> AsyncGenerator[AsyncSession, None]:
     """
-    Provides an AsyncSession bound to the per-test connection.
-
-    The fixture does not own the transaction lifecycle. Transaction
-    management is handled by the outer transaction fixture.
+    Create an AsyncSession bound to the transactional connection.
     """
+
     session_factory = async_sessionmaker(
-        bind=connection,
+        bind=transaction,
         class_=AsyncSession,
         expire_on_commit=False,
         autoflush=False,

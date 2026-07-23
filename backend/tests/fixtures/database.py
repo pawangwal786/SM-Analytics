@@ -21,5 +21,5 @@ def database_url(postgres_container: str | None) -> str:
     if postgres_container:
         return postgres_container
 
-    # 3. Fail gracefully if neither is available
-    pytest.skip("No TEST_DATABASE_URL provided and Docker daemon is unavailable for Testcontainers.")
+    # 3. Fail fast when no database is available for integration tests.
+    raise RuntimeError("No TEST_DATABASE_URL was provided and no test database could be started.")
