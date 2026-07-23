@@ -1,8 +1,13 @@
 from collections.abc import AsyncGenerator
 
-import pytest
 import pytest_asyncio
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncConnection,
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from backend.libs.database.base import Base
 
@@ -13,12 +18,6 @@ async def engine(database_url: str) -> AsyncGenerator[AsyncEngine, None]:
     test_engine = create_async_engine(database_url, pool_pre_ping=True, echo=False)
     yield test_engine
     await test_engine.dispose()
-
-
-@pytest.fixture(scope="session")
-def session_factory(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
-    """Creates the session factory bound to the test engine."""
-    return async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False, autoflush=False)
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
@@ -41,18 +40,48 @@ async def create_schema(engine: AsyncEngine) -> AsyncGenerator[None, None]:
 
 
 @pytest_asyncio.fixture
-async def db_session(session_factory: async_sessionmaker[AsyncSession]) -> AsyncGenerator[AsyncSession, None]:
+async def connection(
+    engine: AsyncEngine,
+) -> AsyncGenerator[AsyncConnection, None]:
     """
-    Provides an isolated AsyncSession per test.
-    Wraps the test inside a savepoint (nested transaction) and rolls it back after the test completes.
-    This provides fast test isolation without re-creating tables.
+    Creates a dedicated database connection for each test.
     """
+    async with engine.connect() as connection:
+        yield connection
 
-    async with session_factory() as session, session.begin():
-        # Start a nested savepoint
-        nested = await session.begin_nested()
 
+@pytest_asyncio.fixture
+async def transaction(
+    connection: AsyncConnection,
+) -> AsyncGenerator[AsyncConnection, None]:
+    """
+    Starts an outer database transaction for each test and rolls it back
+    after the test completes.
+    """
+    outer_transaction = await connection.begin()
+
+    try:
+        yield connection
+    finally:
+        await outer_transaction.rollback()
+
+
+@pytest_asyncio.fixture
+async def db_session(
+    connection: AsyncConnection,
+) -> AsyncGenerator[AsyncSession, None]:
+    """
+    Provides an AsyncSession bound to the per-test connection.
+
+    The fixture does not own the transaction lifecycle. Transaction
+    management is handled by the outer transaction fixture.
+    """
+    session_factory = async_sessionmaker(
+        bind=connection,
+        class_=AsyncSession,
+        expire_on_commit=False,
+        autoflush=False,
+    )
+
+    async with session_factory() as session:
         yield session
-
-        # Rollback the savepoint when test completes
-        await nested.rollback()
